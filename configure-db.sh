@@ -1,13 +1,19 @@
 #!/bin/bash
 
 # wait for MSSQL server to start
-export STATUS=0
+export STATUS=1
 i=0
-while [[ $STATUS -eq 0 ]] || [[ $i -lt 30 ]]; do
-	sleep 1
+
+while [[ $STATUS -ne 0 ]] && [[ $i -lt 30 ]]; do
 	i=$i+1
-	STATUS=$(grep 'Recovery is complete' /var/opt/mssql/log/errorlog* | wc -l)
+	/opt/mssql-tools/bin/sqlcmd -t 1 -U sa -P $SA_PASSWORD -Q "select 1" >> /dev/null
+	STATUS=$?
 done
+
+if [ $STATUS -ne 0 ]; then 
+	echo "Error: MSSQL SERVER took more than thirty seconds to start up."
+	exit 1
+fi
 
 echo "======= MSSQL SERVER STARTED ========" | tee -a ./config.log
 # Run the setup script to create the DB and the schema in the DB
