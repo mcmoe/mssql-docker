@@ -1,13 +1,13 @@
-FROM mcr.microsoft.com/mssql/server:2019-CTP2.1-ubuntu
+FROM mcr.microsoft.com/mssql/server:2019-CU4-ubuntu-16.04
 
 # Create a config directory
 RUN mkdir -p /usr/config
 WORKDIR /usr/config
 
-# Bundle config source
-COPY . /usr/config
+# Bundle config source - https://go.microsoft.com/fwlink/?linkid=2099216 - 2019 now runs as non root `mssql` user
+COPY --chown=mssql:root . /usr/config
 
-# Grant permissions for to our scripts to be executable
+# Grant our scripts permission to be executable
 RUN chmod +x /usr/config/entrypoint.sh
 RUN chmod +x /usr/config/configure-db.sh
 
